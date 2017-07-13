@@ -2,10 +2,10 @@ import os
 import time
 from slackclient import SlackClient
 
-#ID and token as environment token
+#BOT ID FROM ENV VARIABLE, WON'T WRITE IT THERE. 
 BOT_TOKEN=os.environ.get('SLACKBOT_TOKEN')
 
-#Instantiate slackbot client
+#SLACK API INSTANCIATION, TO CHECK WHERE WILL THE HATE BE POURED ON
 slack_client = SlackClient(BOT_TOKEN)
 
 def express_pure_rage(CHANNEL, MESSAGE):
@@ -23,7 +23,8 @@ def parse_slack_output(slack_rtm_output):
     if output_list and len(output_list) > 0:
         for output in output_list:
             if output and 'text' in output:
-                # return text, whitespace removed
+                #RETURN ALL NEEDED INFORMATION TO DECIDE WHETHER OR NOT THE USER
+                #SHOULD DIE
                 return output['text'], output['channel']
     return None, None
 
@@ -39,5 +40,5 @@ if __name__ == "__main__":
                 express_pure_rage(CHANNEL, MESSAGE)
             time.sleep(READ_WEBSOCKET_DELAY)
     else:
-        print("CONNECTION FAILED! CHECK YOUR SLACKBOT TOKEN YOU DAMNED NORMIE!")
+        print("CONNECTION FAILED! CHECK YOUR BOT TOKEN YOU DAMNED NORMIE!")
 
