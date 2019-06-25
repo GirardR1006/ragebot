@@ -24,7 +24,8 @@ def express_pure_rage(**payload):
         
         web_client.chat_postMessage(
         channel=channel_id,
-        text=RESPONSE
+        text=RESPONSE,
+        as_user=True
         )
     
 if __name__ == "__main__":
