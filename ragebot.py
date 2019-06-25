@@ -1,44 +1,37 @@
 import os
 import time
-from slackclient import SlackClient
+import slack
 
 #BOT ID FROM ENV VARIABLE, WON'T WRITE IT THERE. 
-BOT_TOKEN=os.environ.get('SLACKBOT_TOKEN')
+bot_token = os.environ.get('SLACKBOT_TOKEN')
 
 #SLACK API INSTANCIATION, TO CHECK WHERE WILL THE HATE BE POURED ON
-slack_client = SlackClient(BOT_TOKEN)
+slack_client = slack.WebClient(token=bot_token)
 
-def express_pure_rage(CHANNEL, MESSAGE):
-    """
-        RECEIVES MESSAGE FROM CHANNEL, CHECK IF IT'S UPPERCASE. IF NOT, 
-        WILL YELL AT USER.
-    """        
+@slack.RTMClient.run_on(event='message')
+def express_pure_rage(**payload):
+    #RETURN ALL NEEDED INFORMATION TO DECIDE WHETHER OR NOT THE USER
+    #SHOULD DIE
+    data = payload['data']
+    web_client = payload['web_client']
+    rtm_client = payload['rtm_client']
+    MESSAGE = data['text']
     if not MESSAGE.isupper():
         RESPONSE = "ICI, ON ÉCRIT EN MAJUSCULE! TU DEVRAIS ÉCRIRE: " + MESSAGE.upper() 
-        slack_client.api_call("chat.postMessage", channel=CHANNEL, text=RESPONSE, as_user=True)
-
-
-def parse_slack_output(slack_rtm_output):
-    output_list = slack_rtm_output
-    if output_list and len(output_list) > 0:
-        for output in output_list:
-            if output and 'text' in output:
-                #RETURN ALL NEEDED INFORMATION TO DECIDE WHETHER OR NOT THE USER
-                #SHOULD DIE
-                return output['text'], output['channel']
-    return None, None
-
-
+        channel_id = data['channel']
+        thread_ts = data['ts']
+        user = data['user']
+        
+        web_client.chat_postMessage(
+        channel=channel_id,
+        text=RESPONSE
+        )
+    
 if __name__ == "__main__":
-    READ_WEBSOCKET_DELAY = 1 # 1 SECOND DELAY BETWEEN READINGS 
     if slack_client.rtm_connect():
         print("RAGEBOT IS CONNECTED! REEEEEEEEEE")
-        while True:
-            MESSAGE, CHANNEL = parse_slack_output(slack_client.rtm_read())
-            #THE HECK WITH STRING BEING BOOLEAN"""
-            if MESSAGE and CHANNEL:
-                express_pure_rage(CHANNEL, MESSAGE)
-            time.sleep(READ_WEBSOCKET_DELAY)
+        rtm_client = slack.RTMClient(token=bot_token)
+        rtm_client.start()
     else:
         print("CONNECTION FAILED! CHECK YOUR BOT TOKEN YOU DAMNED NORMIE!")
 
